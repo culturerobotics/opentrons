@@ -9,8 +9,9 @@ ENV RUNNING_ON_PI=1
 # connecting to Host OS services
 ENV DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
 # Add persisted data directory where new python packages are being installed
+ENV OT_CONFIG_PATH=/data/config
 ENV PYTHONPATH=$PYTHONPATH/data/packages/usr/local/lib/python3.6/site-packages
-ENV PATH=$PATH:/data/packages/usr/local/bin
+ENV PATH=$PATH:/data/packages/usr/local/bin:$OT_CONFIG_PATH/scripts
 # Port name for connecting to smoothie over serial, i.e. /dev/ttyAMA0
 ENV OT_SMOOTHIE_ID=AMA
 ENV OT_SERVER_PORT=31950
@@ -62,10 +63,20 @@ RUN pip install --force-reinstall \
 ENV LABWARE_DEF /etc/labware
 ENV AUDIO_FILES /etc/audio
 ENV USER_DEFN_ROOT /data/user_storage/opentrons_data/labware
+
+# TODO: move everything from the "compute" directory into the api or
+# TODO: update-server, and make the app copy files into these data/configs
+# TODO: directories on install (also, compute scripts into
+# TODO: $OT_CONFIG_PATH/scripts, which is included in PATH above)
+RUN ln -sf $OT_CONFIG_PATH/jupyter /root/.jupyter && \
+    ln -sf $OT_CONFIG_PATH/audio /etc/audio && \
+    ln -sf $OT_CONFIG_PATH/nginx /etc/nginx && \
+    ln -sf $OT_CONFIG_PATH/radvd.conf /etc/radvd.conf && \
+    ln -sf $OT_CONFIG_PATH/inetd.conf /etc/inetd.conf && \
+    ln -sf $OT_CONFIG_PATH/static /usr/share/nginx/html
+
 COPY ./shared-data/robot-data /etc/robot-data
-COPY ./compute/conf/jupyter_notebook_config.py /root/.jupyter/
 COPY ./shared-data/definitions /etc/labware
-COPY ./audio/ /etc/audio
 COPY ./api /tmp/api
 COPY ./api-server-lib /tmp/api-server-lib
 COPY ./update-server /tmp/update-server
@@ -93,14 +104,6 @@ RUN ln -sf /data/user_storage/opentrons_data/95-opentrons-modules.rules /etc/ude
 # GPG public key to verify signed packages
 COPY ./compute/opentrons.asc .
 RUN gpg --import opentrons.asc && rm opentrons.asc
-
-# Everything you want in /usr/local/bin goes into compute/scripts
-COPY ./compute/scripts/* /usr/local/bin/
-
-# All configuration files live in compute/etc and dispatched here
-COPY ./compute/conf/inetd.conf /etc/
-COPY ./compute/conf/nginx.conf /etc/nginx/nginx.conf
-COPY ./compute/static /usr/share/nginx/html
 
 # Logo for login shell
 COPY ./compute/opentrons.motd /etc/motd

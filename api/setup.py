@@ -2,6 +2,7 @@
 # https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/
 import codecs
 import os
+import shutil
 from setuptools import setup, find_packages
 import json
 
@@ -75,3 +76,11 @@ if __name__ == "__main__":
         tests_require=['pytest'],
         include_package_data=True
     )
+
+    if os.environ.get('RUNNING_ON_PI'):
+        # This portion of install only applies to installation inside of a
+        # Docker container running on Resin, where the RUNNING_ON_PI environ
+        # variable will be set
+        resource_dir = os.path.join(HERE, 'opentrons', 'resources')
+        config_dir = os.environ.get('OT_CONFIG_PATH', '/data/config')
+        shutil.copytree(resource_dir, config_dir)
