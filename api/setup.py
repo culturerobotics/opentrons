@@ -44,6 +44,14 @@ INSTALL_REQUIRES = [
     'numpy==1.12.1',
     'urwid==1.3.1']
 
+def setup_resources(config_dir):
+    """ Copy the system configuration files and scripts from the package
+    to the proper directory, and set appropriate permissions.
+    """
+    if os.path.exists(config_dir):
+        shutil.rmtree(config_dir)
+    shutil.copytree(resource_dir, config_dir)
+
 
 def read(*parts):
     """
@@ -77,10 +85,10 @@ if __name__ == "__main__":
         include_package_data=True
     )
 
-    if os.environ.get('RUNNING_ON_PI'):
+    if os.environ.get('OT_IS_CONTAINERIZED'):
         # This portion of install only applies to installation inside of a
         # Docker container running on Resin, where the RUNNING_ON_PI environ
         # variable will be set
         resource_dir = os.path.join(HERE, 'opentrons', 'resources')
-        config_dir = os.environ.get('OT_CONFIG_PATH', '/data/config')
-        shutil.copytree(resource_dir, config_dir)
+        config_dir = os.environ.get('OT_CONFIG_PATH', '/data/system')
+        setup_resources(config_dir)

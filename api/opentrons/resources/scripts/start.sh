@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # mdns announcement
-announce_mdns.py &
+if [ ! -z $RUNNING_ON_PI ]; then
+    announce_mdns.py &
+fi
 
 # serve static pages and proxy HTTP services
 nginx
@@ -14,7 +16,7 @@ mkdir -p /data/boot.d
 run-parts /data/boot.d
 
 echo "Starting Opentrons update server"
-python -m otupdate --debug --port $OT_UPDATE_PORT &
+python -m otupdate --debug --port 34000 &
 
 echo "Starting Jupyter Notebook server"
 mkdir -p /data/user_storage/opentrons_data/jupyter
@@ -31,6 +33,6 @@ fi
 
 export ENABLE_NETWORKING_ENDPOINTS=true
 echo "Starting Opentrons API server"
-python -m opentrons.server.main -U $OT_SERVER_UNIX_SOCKET_PATH opentrons.server.main:init
+python -m opentrons.server.main -U /tmp/aiohttp.sock opentrons.server.main:init
 echo "Server exited unexpectedly. Please power-cycle the machine, and contact Opentrons support."
 while true; do sleep 1; done

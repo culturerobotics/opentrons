@@ -299,7 +299,7 @@ def main():
     if not os.environ.get("ENABLE_VIRTUAL_SMOOTHIE"):
         setup_udev_rules_file()
     atexit.register(unlock_resin_updates)
-    lock_resin_updates()
+    #lock_resin_updates()
     web.run_app(init(), host=args.hostname, port=args.port, path=args.path)
     arg_parser.exit(message="Stopped\n")
 
