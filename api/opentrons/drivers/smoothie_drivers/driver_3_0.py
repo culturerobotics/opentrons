@@ -61,7 +61,7 @@ SEC_PER_MIN = 60
 DEFAULT_SMOOTHIE_TIMEOUT = 1
 DEFAULT_MOVEMENT_TIMEOUT = 30
 SMOOTHIE_BOOT_TIMEOUT = 3
-DEFAULT_STABILIZE_DELAY = 0.1
+DEFAULT_STABILIZE_DELAY = 0.5
 
 DEFAULT_COMMAND_RETRIES = 20
 
@@ -857,6 +857,7 @@ class SmoothieDriver_3_0_0:
                 self._connection,
                 timeout=timeout)
         except serial_communication.SerialNoResponse as e:
+            print("serial no response")
             retries -= 1
             if retries <= 0:
                 raise e
