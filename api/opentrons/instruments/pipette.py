@@ -30,10 +30,14 @@ DEFAULT_DISPENSE_SPEED = 10
 
 DEFAULT_TIP_PRESS_MM = -10
 
-DEFAULT_PLUNGE_CURRENT = 0.1
+# ZP: was set to 0.1
+DEFAULT_PLUNGE_CURRENT = 2.0
 
 SHAKE_OFF_TIPS_SPEED = 25
-SHAKE_OFF_TIPS_DISTANCE = 2
+# ZP: Was set to 2
+SHAKE_OFF_TIPS_DISTANCE = 1.5
+# Only for pickup shake
+SHAKE_OFF_TIPS_HEIGHT = 35
 
 
 def _sleep(seconds):
@@ -936,6 +940,11 @@ class Pipette:
                 self.move_to(
                     self.current_tip().top(0),
                     strategy='direct')
+
+            # Added by Zack
+            self.move_to(self.current_tip().top(SHAKE_OFF_TIPS_HEIGHT))
+            self._shake_off_tips(location = None)
+
             self._add_tip(
                 length=self._tip_length
             )
